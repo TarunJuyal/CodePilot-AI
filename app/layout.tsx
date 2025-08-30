@@ -3,6 +3,7 @@ import { Roboto } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./components/theme-provider";
 import Navbar from "./components/navbar";
+import { PromptProvider } from "./Context/CustomPromptButtonContext";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -26,7 +27,9 @@ export default function RootLayout({
       <body className={roboto.variable}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Navbar />
-          <div className="m-4 p-4">{children}</div>
+          <div className="m-4 p-4 h-dvh">
+            <PromptProvider>{children}</PromptProvider>
+          </div>
         </ThemeProvider>
       </body>
     </html>

@@ -6,6 +6,7 @@ export default function Home() {
     {
       icon: <Code2 className="w-6 h-6" />,
       title: "Code Review",
+      link: "/code-review",
       description:
         "Get instant AI-powered reviews and improvements for your code.",
       features: [
@@ -20,6 +21,7 @@ export default function Home() {
     {
       icon: <GitPullRequest className="w-6 h-6" />,
       title: "Code Conversion",
+      link: "/code-conversion",
       description: "Convert code between languages or frameworks seamlessly.",
       features: [
         "Convert code between popular programming languages.",
@@ -31,6 +33,7 @@ export default function Home() {
     {
       icon: <ClipboardList className="w-6 h-6" />,
       title: "Epic Generator",
+      link: "/epic-generator",
       description:
         "Generate epics and subtasks from a project description automatically.",
       features: [
