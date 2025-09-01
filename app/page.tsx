@@ -33,7 +33,7 @@ export default function Home() {
     {
       icon: <ClipboardList className="w-6 h-6" />,
       title: "Epic Generator",
-      link: "/epic-generator",
+      link: "/projects",
       description:
         "Generate epics and subtasks from a project description automatically.",
       features: [

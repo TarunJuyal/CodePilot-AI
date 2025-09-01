@@ -17,7 +17,7 @@ import { BrainCircuit, Menu, X } from "lucide-react";
 const featureTabs = [
   { label: "Code Review", href: "/code-review", isVisible: true },
   { label: "Code Conversion", href: "/code-conversion", isVisible: true },
-  { label: "Epic Generator", href: "/epic-generator", isVisible: true },
+  { label: "Epic Generator", href: "/projects", isVisible: true },
 ];
 
 export default function Navbar() {

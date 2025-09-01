@@ -10,22 +10,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { Trash2, Eye } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type Project = {
-  id: number;
+  _id: string;
   name: string;
   createdAt: string;
 };
 
 const mockProjects: Project[] = Array.from({ length: 10 }, (_, i) => ({
-  id: i + 1,
+  _id: String(i + 1),
   name: `Project ${i + 1}`,
   createdAt: `2025-08-${(i % 28) + 1}`,
 }));
 
 export default function EpicGeneratorPage() {
+  const router = useRouter();
   const [projects, setProjects] = useState<Project[]>(mockProjects);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -51,7 +53,7 @@ export default function EpicGeneratorPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Generate Epics for Your Project</h1>
         <Button>
-          <Link href="/epic-generator/create">Add Project</Link>
+          <Link href="/projects/create">Add Project</Link>
         </Button>
       </div>
 
@@ -79,22 +81,23 @@ export default function EpicGeneratorPage() {
             </TableHeader>
             <TableBody>
               {paginatedProjects.map((project, index) => (
-                <TableRow key={project.id}>
+                <TableRow key={project._id}>
                   <TableCell>
                     {(currentPage - 1) * pageSize + index + 1}
                   </TableCell>
                   <TableCell>{project.name}</TableCell>
                   <TableCell>{project.createdAt}</TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button variant="ghost" size="icon">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => router.push(`/projects/${project._id}`)}
+                    >
                       <Eye className="h-4 w-4 text-blue-500" />
                     </Button>
-                    <Button variant="ghost" size="icon">
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon">
+                    {/* <Button variant="ghost" size="icon">
                       <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
+                    </Button> */}
                   </TableCell>
                 </TableRow>
               ))}
