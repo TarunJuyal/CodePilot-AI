@@ -4,13 +4,27 @@ import { Button } from "@/components/ui/button";
 import { AddPromptButton } from "../components/add-custom-prompt-button";
 import { usePrompt } from "../Context/CustomPromptButtonContext";
 import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
+import useLoadingDots from "../hooks/useLoadingMessage";
 
 export default function CodeReviewPage() {
   const { getPrompt } = usePrompt();
   const prompt = getPrompt("code-review");
 
+  const loadingMessage = useLoadingDots(
+    "Analyzing your code for potential improvements"
+  );
+
+  const [loading, setLoading] = useState(false);
+  const [codeInput, setCodeInput] = useState("");
+  const [reviewOutput, setReviewOutput] = useState("");
+
   const handleSubmit = () => {
     console.log("Submitting with Code Review prompt:", prompt);
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 6000);
   };
 
   return (
@@ -33,6 +47,8 @@ export default function CodeReviewPage() {
           <Textarea
             className="flex-1 resize-none h-full"
             placeholder="Paste your code here..."
+            value={codeInput}
+            onChange={(e) => setCodeInput(e.target.value)}
           />
         </div>
 
@@ -41,7 +57,11 @@ export default function CodeReviewPage() {
           <h2 className="text-lg font-semibold mb-2">Review</h2>
           <Textarea
             className="flex-1 resize-none h-full"
-            placeholder="AI review will appear here..."
+            placeholder={
+              loading ? loadingMessage : "AI review will appear here..."
+            }
+            value={reviewOutput || ""}
+            onChange={(e) => setReviewOutput(e.target.value)}
           />
         </div>
       </div>

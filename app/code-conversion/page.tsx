@@ -11,13 +11,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useState } from "react";
+import useLoadingDots from "../hooks/useLoadingMessage";
 
 export default function CodeConversionPage() {
   const { getPrompt } = usePrompt();
   const prompt = getPrompt("code-conversion");
 
+  const loadingMessage = useLoadingDots(
+    "Converting syntax and adapting logic for the selected framework"
+  );
+
+  const [loading, setLoading] = useState(false);
+  const [codeInput, setCodeInput] = useState("");
+  const [convertedOutput, setConvertedOutput] = useState("");
+
   const handleSubmit = () => {
     console.log("Submitting with Code Conversion prompt:", prompt);
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 6000);
   };
 
   return (
@@ -51,6 +65,8 @@ export default function CodeConversionPage() {
           <Textarea
             className="flex-1 resize-none h-full"
             placeholder="Paste your code here..."
+            value={codeInput}
+            onChange={(e) => setCodeInput(e.target.value)}
           />
         </div>
 
@@ -69,7 +85,11 @@ export default function CodeConversionPage() {
           </div>
           <Textarea
             className="flex-1 resize-none h-full"
-            placeholder="Converted code will appear here..."
+            placeholder={
+              loading ? loadingMessage : "Converted code will appear here..."
+            }
+            value={convertedOutput || ""}
+            onChange={(e) => setConvertedOutput(e.target.value)}
           />
         </div>
       </div>
