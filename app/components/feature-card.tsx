@@ -31,7 +31,7 @@ export function FeatureCard({
   if (!isVisible) return null;
   return (
     <Card
-      className="w-full hover:shadow-lg transition-shadow duration-200 transform hover:scale-105"
+      className="w-full hover:shadow-lg transition-shadow duration-200 transform hover:scale-105 cursor-pointer"
       onClick={() => router.push(link)}
     >
       <CardHeader className="flex flex-col items-start space-y-2">

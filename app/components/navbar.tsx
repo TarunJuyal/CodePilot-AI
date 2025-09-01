@@ -71,7 +71,7 @@ export default function Navbar() {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => signOut()}>
+                <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
                   Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
