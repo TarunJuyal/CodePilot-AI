@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "./components/theme-provider";
 import Navbar from "./components/navbar";
 import { PromptProvider } from "./Context/CustomPromptButtonContext";
+import { Toaster } from "@/components/ui/sonner";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -28,7 +29,10 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Navbar />
           <div className="m-4 p-4 h-dvh">
-            <PromptProvider>{children}</PromptProvider>
+            <PromptProvider>
+              {children}
+              <Toaster richColors position="bottom-right" closeButton />
+            </PromptProvider>
           </div>
         </ThemeProvider>
       </body>
