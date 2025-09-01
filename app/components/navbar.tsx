@@ -13,6 +13,7 @@ import { ThemeSwitch } from "./theme-switch";
 import Link from "next/link";
 import { useState } from "react";
 import { BrainCircuit, Menu, X } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 
 const featureTabs = [
   { label: "Code Review", href: "/code-review", isVisible: true },
@@ -21,6 +22,7 @@ const featureTabs = [
 ];
 
 export default function Navbar() {
+  const { data: session } = useSession();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -59,19 +61,17 @@ export default function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar className="cursor-pointer">
-                  <AvatarImage src="dummy-url" alt="User Profile" />
-                  <AvatarFallback>TJ</AvatarFallback>
+                  <AvatarImage
+                    src={session?.user.image || ""}
+                    alt={session?.user.name || "User Profile"}
+                  />
+                  <AvatarFallback>{session?.user.name || "?"}</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => {
-                    // NextAuth signOut will go here
-                    console.log("Sign out clicked");
-                  }}
-                >
+                <DropdownMenuItem onClick={() => signOut()}>
                   Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>

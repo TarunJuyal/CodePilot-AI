@@ -5,6 +5,10 @@ import { ThemeProvider } from "./components/theme-provider";
 import Navbar from "./components/navbar";
 import { PromptProvider } from "./Context/CustomPromptButtonContext";
 import { Toaster } from "@/components/ui/sonner";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../lib/auth";
+import { redirect } from "next/navigation";
+import NextAuthProvider from "./components/session-provider";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -18,22 +22,30 @@ export const metadata: Metadata = {
     "Leverage AI to review code, convert code between languages, and generate epics and user stories from project descriptions. Boost your software development workflow with intelligent automation and agile planning tools.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/api/auth/signin");
+  }
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={roboto.variable}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Navbar />
-          <div className="m-4 p-4 h-dvh">
-            <PromptProvider>
-              {children}
-              <Toaster richColors position="bottom-right" closeButton />
-            </PromptProvider>
-          </div>
+          <NextAuthProvider>
+            <Navbar />
+            <div className="m-4 p-4 h-dvh">
+              <PromptProvider>
+                {children}
+                <Toaster richColors position="bottom-right" closeButton />
+              </PromptProvider>
+            </div>
+          </NextAuthProvider>
         </ThemeProvider>
       </body>
     </html>
