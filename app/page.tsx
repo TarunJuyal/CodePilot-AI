@@ -28,7 +28,7 @@ export default function Home() {
         "Preserve logic and structure during conversion.",
         "Support for code snippets and full files.",
       ],
-      isVisible: true,
+      isVisible: false,
     },
     {
       icon: <ClipboardList className="w-6 h-6" />,
@@ -42,7 +42,7 @@ export default function Home() {
         "Customize output for different project management tools.",
         "Accelerate project planning and task breakdown.",
       ],
-      isVisible: true,
+      isVisible: false,
     },
   ];
 
@@ -50,7 +50,8 @@ export default function Home() {
     <div className="container mx-auto py-10">
       <h1 className="text-3xl font-bold mb-3">Welcome to CodePilot</h1>
       <h3 className="text-xl mb-8">
-        Your AI Powered Dev Companion - Review, Convert and Plan Smarter.
+        Your AI Powered Dev Companion - Currently support Code Review (Code
+        Translation and Epic Generation coming soon)
       </h3>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {features.map((f) => (

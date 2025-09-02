@@ -1,11 +1,12 @@
-import { InferenceClient } from "@huggingface/inference";
-
-declare global {
-  // Prevent multiple instances during hot reload in dev
-  var hf: InferenceClient | undefined;
+export async function postQuery(endpoint: string, data: unknown) {
+  const response = await fetch(endpoint, {
+    headers: {
+      Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY!}`,
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  const result = await response.json();
+  return result;
 }
-
-export const hf =
-  global.hf || new InferenceClient(process.env.HUGGINGFACE_API_KEY!);
-
-if (process.env.NODE_ENV !== "production") global.hf = hf;

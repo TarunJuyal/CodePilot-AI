@@ -6,6 +6,7 @@ import { usePrompt } from "../Context/CustomPromptButtonContext";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import useLoadingDots from "../hooks/useLoadingMessage";
+import { toast } from "sonner";
 
 export default function CodeReviewPage() {
   const { getPrompt } = usePrompt();
@@ -19,12 +20,32 @@ export default function CodeReviewPage() {
   const [codeInput, setCodeInput] = useState("");
   const [reviewOutput, setReviewOutput] = useState("");
 
-  const handleSubmit = () => {
-    console.log("Submitting with Code Review prompt:", prompt);
+  const handleSubmit = async () => {
     setLoading(true);
-    setTimeout(() => {
+    setReviewOutput("");
+
+    try {
+      const res = await fetch("/api/review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: codeInput, customPrompt: prompt }),
+      });
+
+      const data = await res.json();
       setLoading(false);
-    }, 6000);
+
+      if (data.output) {
+        setReviewOutput(data.output);
+        console.log("Full response:", data);
+        toast.success("Code review generated successfully!");
+      } else {
+        setReviewOutput("Failed to generate review.");
+        toast.error(data.error || "Failed to generate review.");
+      }
+    } catch (error: unknown) {
+      console.error("Error submitting code for review:", error);
+      toast.error("An error occurred while submitting your code.");
+    }
   };
 
   return (
@@ -34,7 +55,11 @@ export default function CodeReviewPage() {
         <h1 className="text-2xl font-bold">Review Your Code</h1>
         <div className="flex gap-3">
           <AddPromptButton pageKey="code-review" />
-          <Button variant="default" onClick={handleSubmit}>
+          <Button
+            variant="default"
+            onClick={handleSubmit}
+            disabled={loading || !codeInput.trim()}
+          >
             Submit Code Review
           </Button>
         </div>

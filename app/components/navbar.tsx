@@ -17,8 +17,8 @@ import { signOut, useSession } from "next-auth/react";
 
 const featureTabs = [
   { label: "Code Review", href: "/code-review", isVisible: true },
-  { label: "Code Conversion", href: "/code-conversion", isVisible: true },
-  { label: "Epic Generator", href: "/projects", isVisible: true },
+  { label: "Code Conversion", href: "/code-conversion", isVisible: false },
+  { label: "Epic Generator", href: "/projects", isVisible: false },
 ];
 
 export default function Navbar() {
