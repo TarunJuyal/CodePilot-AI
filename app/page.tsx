@@ -50,8 +50,8 @@ export default function Home() {
     <div className="container mx-auto py-10">
       <h1 className="text-3xl font-bold mb-3">Welcome to CodePilot</h1>
       <h3 className="text-xl mb-8">
-        Your AI Powered Dev Companion - Currently support Code Review (Code
-        Translation and Epic Generation coming soon)
+        Your AI Powered Dev Companion - Currently support Code Review & Code
+        Conversion (Epic Generation coming soon)
       </h3>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {features.map((f) => (
