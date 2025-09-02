@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import useLoadingDots from "../hooks/useLoadingMessage";
 import { toast } from "sonner";
+import { useTypingEffect } from "../hooks/useTypingEffect";
 
 export default function CodeReviewPage() {
   const { getPrompt } = usePrompt();
@@ -34,17 +35,18 @@ export default function CodeReviewPage() {
       const data = await res.json();
       setLoading(false);
 
-      if (data.output) {
+      if (data?.output) {
         setReviewOutput(data.output);
-        console.log("Full response:", data);
         toast.success("Code review generated successfully!");
       } else {
         setReviewOutput("Failed to generate review.");
-        toast.error(data.error || "Failed to generate review.");
+        toast.error(data?.error || "Failed to generate review.");
       }
     } catch (error: unknown) {
       console.error("Error submitting code for review:", error);
       toast.error("An error occurred while submitting your code.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -85,7 +87,7 @@ export default function CodeReviewPage() {
             placeholder={
               loading ? loadingMessage : "AI review will appear here..."
             }
-            value={reviewOutput || ""}
+            value={useTypingEffect(reviewOutput) || ""}
             onChange={(e) => setReviewOutput(e.target.value)}
           />
         </div>
