@@ -14,7 +14,7 @@ export default function CodeReviewPage() {
   const prompt = getPrompt("code-review");
 
   const loadingMessage = useLoadingDots(
-    "Analyzing your code for potential improvements"
+    "Analyzing your code for potential improvements or bugs"
   );
 
   const [loading, setLoading] = useState(false);
