@@ -13,6 +13,10 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import useLoadingDots from "../hooks/useLoadingMessage";
+import { useTypingEffect } from "../hooks/useTypingEffect";
+import { codeConversionMap } from "../utils/constants";
+import { toast } from "sonner";
+import { buildConversionPrompt } from "../utils/utils";
 
 export default function CodeConversionPage() {
   const { getPrompt } = usePrompt();
@@ -25,13 +29,42 @@ export default function CodeConversionPage() {
   const [loading, setLoading] = useState(false);
   const [codeInput, setCodeInput] = useState("");
   const [convertedOutput, setConvertedOutput] = useState("");
+  const [inputLang, setInputLang] = useState("");
+  const [outputLang, setOutputLang] = useState("");
 
-  const handleSubmit = () => {
-    console.log("Submitting with Code Conversion prompt:", prompt);
+  const handleSubmit = async () => {
     setLoading(true);
-    setTimeout(() => {
+    setConvertedOutput("");
+
+    try {
+      const finalPrompt = buildConversionPrompt({
+        inputCode: codeInput,
+        inputLang: inputLang === "defaultInputLang" ? "" : inputLang,
+        outputLang: outputLang === "defaultOutputLang" ? "" : outputLang,
+        customPrompt: prompt,
+      });
+      const res = await fetch("/api/convert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: codeInput, customPrompt: finalPrompt }),
+      });
+
+      const data = await res.json();
       setLoading(false);
-    }, 6000);
+
+      if (data?.output) {
+        setConvertedOutput(data.output);
+        toast.success("Converted successfully!");
+      } else {
+        setConvertedOutput("Failed to covert.");
+        toast.error(data?.error || "Failed to convert.");
+      }
+    } catch (error: unknown) {
+      console.error("Error submitting conversion:", error);
+      toast.error("An error occurred while submitting your request.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,7 +74,11 @@ export default function CodeConversionPage() {
         <h1 className="text-2xl font-bold">Convert Your Code</h1>
         <div className="flex gap-3">
           <AddPromptButton pageKey="code-conversion" />
-          <Button variant="default" onClick={handleSubmit}>
+          <Button
+            variant="default"
+            onClick={handleSubmit}
+            disabled={loading || !codeInput.trim() || !inputLang || !outputLang}
+          >
             Submit Conversion
           </Button>
         </div>
@@ -52,19 +89,32 @@ export default function CodeConversionPage() {
         <div className="flex flex-col flex-1 p-4">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-semibold">Enter code to convert</h2>
-            <Select defaultValue="jsp">
-              <SelectTrigger className="w-[120px]">
-                <SelectValue placeholder="Select input" />
+            <Select
+              value={inputLang}
+              onValueChange={(value) => {
+                setInputLang(value);
+                setOutputLang("");
+              }}
+              defaultValue="defaultInputLang"
+            >
+              <SelectTrigger className="w-[300px]">
+                <SelectValue placeholder="Select Source" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="jsp">JSP</SelectItem>
-                <SelectItem value="html">HTML</SelectItem>
+                <SelectItem key="input-defaultLang" value="defaultInputLang">
+                  Select Source
+                </SelectItem>
+                {Object.keys(codeConversionMap).map((lang) => (
+                  <SelectItem key={`input-${lang}`} value={lang}>
+                    {lang}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
           <Textarea
             className="flex-1 resize-none h-full"
-            placeholder="Paste your code here..."
+            placeholder="Write/Paste your code/input here..."
             value={codeInput}
             onChange={(e) => setCodeInput(e.target.value)}
           />
@@ -74,21 +124,37 @@ export default function CodeConversionPage() {
         <div className="flex flex-col flex-1 p-4">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-semibold">Converted Code</h2>
-            <Select defaultValue="react">
-              <SelectTrigger className="w-[120px]">
-                <SelectValue placeholder="Select output" />
+            <Select
+              value={outputLang}
+              onValueChange={(value) => {
+                setOutputLang(value);
+              }}
+              defaultValue="defaultOutputLang"
+              disabled={!inputLang || inputLang === "defaultInputLang"}
+            >
+              <SelectTrigger className="w-[300px]">
+                <SelectValue placeholder="Select Target" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="react">React</SelectItem>
+                <SelectItem value="defaultOutputLang">Select Target</SelectItem>
+                {inputLang &&
+                  inputLang !== "defaultInputLang" &&
+                  codeConversionMap[inputLang]?.map((lang) => (
+                    <SelectItem key={`output-${lang}`} value={lang}>
+                      {lang}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
           <Textarea
             className="flex-1 resize-none h-full"
             placeholder={
-              loading ? loadingMessage : "Converted code will appear here..."
+              loading
+                ? loadingMessage
+                : "Converted code/output will appear here..."
             }
-            value={convertedOutput || ""}
+            value={useTypingEffect(convertedOutput) || ""}
             onChange={(e) => setConvertedOutput(e.target.value)}
           />
         </div>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { postQuery } from "@/lib/hf";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { CODE_REVIEW_MODEL } from "@/app/utils/constants";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
     const result = await postQuery(
       "https://router.huggingface.co/v1/chat/completions",
       {
-        model: "meta-llama/Llama-4-Scout-17B-16E-Instruct:groq",
+        model: CODE_REVIEW_MODEL,
         messages: [{ role: "user", content: prompt }],
       }
     );
