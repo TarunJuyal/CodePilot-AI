@@ -28,7 +28,7 @@ export default function Home() {
         "Preserve logic and structure during conversion.",
         "Support for code snippets and full files.",
       ],
-      isVisible: false,
+      isVisible: true,
     },
     {
       icon: <ClipboardList className="w-6 h-6" />,
