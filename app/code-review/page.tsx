@@ -44,7 +44,7 @@ export default function CodeReviewPage() {
       }
     } catch (error: unknown) {
       console.error("Error submitting code for review:", error);
-      toast.error("An error occurred while submitting your code.");
+      toast.error("An error occurred while submitting your request.");
     } finally {
       setLoading(false);
     }

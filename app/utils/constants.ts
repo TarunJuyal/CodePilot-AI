@@ -47,3 +47,7 @@ export const CODE_REVIEW_MODEL =
   "meta-llama/Llama-4-Scout-17B-16E-Instruct:groq";
 export const CODE_CONVERSION_MODEL =
   "meta-llama/Llama-4-Scout-17B-16E-Instruct:groq";
+export const CODE_GENERATION_MODEL =
+  "meta-llama/Llama-4-Scout-17B-16E-Instruct:groq";
+export const EPIC_JSON_SUMMARIZATION_MODEL =
+  "meta-llama/Llama-4-Scout-17B-16E-Instruct:groq";

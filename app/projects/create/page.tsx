@@ -17,6 +17,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { useTypingEffect } from "@/app/hooks/useTypingEffect";
 
 export default function CreateEpicPage() {
   const loadingMessage = useLoadingDots(
@@ -30,31 +31,67 @@ export default function CreateEpicPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [saveConfirmed, setSaveConfirmed] = useState(false);
 
-  const handleSubmit = () => {
-    console.log("Generating epics for project:", projectName);
-    console.log("Requirements:", requirementInput);
-
+  const handleSubmit = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setEpicOutput("✅ Mock generated epics go here...");
+    setEpicOutput("");
+
+    try {
+      const res = await fetch("/api/generateEpics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectName, requirements: requirementInput }),
+      });
+
+      const data = await res.json();
       setLoading(false);
-    }, 3000);
+
+      if (data?.output) {
+        setEpicOutput(data.output);
+        toast.success("Epics generated successfully!");
+      } else {
+        setEpicOutput("Failed to generate epics.");
+        toast.error(data?.error || "Failed to generate Epics.");
+      }
+    } catch (error: unknown) {
+      console.error("Error submitting code for project generation:", error);
+      toast.error("An error occurred while submitting your request.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSaveConfirmed = () => {
-    console.log("Saving project:", projectName);
-    console.log("Requirements:", requirementInput);
-    console.log("Generated Epics:", epicOutput);
+  const handleSaveConfirmed = async () => {
     setSaveConfirmed(true);
     setConfirmOpen(false);
     const toastId = toast.loading("Saving project and epics...");
 
-    setTimeout(() => {
-      setSaveConfirmed(false);
-      toast.success("Project and Epics saved successfully!", {
+    try {
+      const res = await fetch("/api/saveEpics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectName, generatedEpics: epicOutput }),
+      });
+
+      const data = await res.json();
+
+      if (data?.output) {
+        console.log(data.output);
+        toast.success("Project and Epics saved successfully!", {
+          id: toastId,
+        });
+      } else {
+        toast.error(data?.error || "Failed to save epics.", {
+          id: toastId,
+        });
+      }
+    } catch (error: unknown) {
+      console.error("Error submitting code for project generation:", error);
+      toast.error("An error occurred while submitting your request.", {
         id: toastId,
       });
-    }, 2000);
+    } finally {
+      setSaveConfirmed(false);
+    }
   };
 
   return (
@@ -132,7 +169,7 @@ export default function CreateEpicPage() {
                 ? loadingMessage
                 : "AI generated epics will appear here..."
             }
-            value={epicOutput}
+            value={useTypingEffect(epicOutput) || ""}
             onChange={(e) => setEpicOutput(e.target.value)}
           />
         </div>

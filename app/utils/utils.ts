@@ -164,3 +164,10 @@ ${inputCode}
 \`\`\`
 `;
 }
+
+export function cleanJsonString(aiOutput: string) {
+  return aiOutput
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
+}
