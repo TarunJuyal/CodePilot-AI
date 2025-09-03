@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { RouteParams } from "@/app/utils/constants";
 
 export async function GET(_req: NextRequest, { params }: RouteParams) {
+  const id = (await params).id;
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -12,7 +13,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
 
   try {
     const epic = await prisma.epic.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { stories: true, project: true },
     });
 
@@ -31,6 +32,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
 }
 
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
+  const id = (await params).id;
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -41,7 +43,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     const { title, description, acceptanceCriteria } = body;
 
     const epic = await prisma.epic.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { project: true },
     });
 
@@ -50,7 +52,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     }
 
     const updatedEpic = await prisma.epic.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(title !== undefined && { title }),
         ...(description !== undefined && { description }),
@@ -69,6 +71,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 }
 
 export async function DELETE(_req: NextRequest, { params }: RouteParams) {
+  const id = (await params).id;
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -76,7 +79,7 @@ export async function DELETE(_req: NextRequest, { params }: RouteParams) {
 
   try {
     const epic = await prisma.epic.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { project: true },
     });
 
@@ -88,7 +91,7 @@ export async function DELETE(_req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    await prisma.epic.delete({ where: { id: params.id } });
+    await prisma.epic.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
   } catch (err: unknown) {

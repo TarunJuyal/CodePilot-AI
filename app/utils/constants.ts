@@ -53,5 +53,5 @@ export const EPIC_JSON_SUMMARIZATION_MODEL =
   "meta-llama/Llama-4-Scout-17B-16E-Instruct:groq";
 
 export interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }

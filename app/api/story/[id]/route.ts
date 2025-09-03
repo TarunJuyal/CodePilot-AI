@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { RouteParams } from "@/app/utils/constants";
 
 export async function GET(_req: NextRequest, { params }: RouteParams) {
+  const id = (await params).id;
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -12,7 +13,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
 
   try {
     const story = await prisma.story.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         epic: { include: { project: true } },
       },
@@ -37,6 +38,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
 }
 
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
+  const id = (await params).id;
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -47,7 +49,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     const { title, description, acceptanceCriteria, storyPoints } = body;
 
     const story = await prisma.story.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { epic: { include: { project: true } } },
     });
 
@@ -60,7 +62,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     }
 
     const updatedStory = await prisma.story.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(title !== undefined && { title }),
         ...(description !== undefined && { description }),
@@ -80,6 +82,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 }
 
 export async function DELETE(_req: NextRequest, { params }: RouteParams) {
+  const id = (await params).id;
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -87,7 +90,7 @@ export async function DELETE(_req: NextRequest, { params }: RouteParams) {
 
   try {
     const story = await prisma.story.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { epic: { include: { project: true } } },
     });
 
@@ -99,7 +102,7 @@ export async function DELETE(_req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    await prisma.story.delete({ where: { id: params.id } });
+    await prisma.story.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
   } catch (err: unknown) {

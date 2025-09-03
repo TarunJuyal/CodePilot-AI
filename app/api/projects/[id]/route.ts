@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { RouteParams } from "@/app/utils/constants";
 
 export async function GET(_req: NextRequest, { params }: RouteParams) {
+  const id = (await params).id;
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -12,7 +13,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
 
   try {
     const project = await prisma.project.findUnique({
-      where: { id: params.id, userId: session.user.id },
+      where: { id, userId: session.user.id },
       include: {
         epics: {
           include: { stories: true },
@@ -35,6 +36,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
 }
 
 export async function DELETE(_req: NextRequest, { params }: RouteParams) {
+  const id = (await params).id;
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -42,7 +44,7 @@ export async function DELETE(_req: NextRequest, { params }: RouteParams) {
 
   try {
     await prisma.project.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });
