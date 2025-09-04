@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Story, Epic } from "@/lib/generated/prisma";
+import { PAGE_SIZE } from "@/app/utils/constants";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -54,24 +55,44 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const projects = await prisma.project.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        name: true,
-        createdAt: true,
-      },
-    });
+    const { searchParams } = new URL(req.url);
+    const currentPage = parseInt(searchParams.get("currentPage") || "1", 10);
+    const pageSize = PAGE_SIZE;
+    const skip = (currentPage - 1) * pageSize;
 
-    return NextResponse.json(projects, { status: 200 });
+    const [total, projects] = await Promise.all([
+      prisma.project.count({
+        where: { userId: session.user.id },
+      }),
+      prisma.project.findMany({
+        where: { userId: session.user.id },
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          createdAt: true,
+        },
+        skip,
+        take: pageSize,
+      }),
+    ]);
+
+    return NextResponse.json(
+      {
+        projects,
+        total,
+        currentPage,
+        totalPages: Math.ceil(total / pageSize),
+      },
+      { status: 200 }
+    );
   } catch (err: unknown) {
     console.error("Get Projects API error:", err);
     return NextResponse.json(

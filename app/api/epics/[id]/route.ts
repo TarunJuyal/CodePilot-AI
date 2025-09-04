@@ -58,6 +58,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
         ...(description !== undefined && { description }),
         ...(acceptanceCriteria !== undefined && { acceptanceCriteria }),
       },
+      include: { stories: true },
     });
 
     return NextResponse.json(updatedEpic, { status: 200 });

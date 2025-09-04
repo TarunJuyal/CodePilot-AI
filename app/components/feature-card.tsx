@@ -16,7 +16,6 @@ interface FeatureCardProps {
   description: string;
   features: string[];
   link: string;
-  isVisible: boolean;
 }
 
 export function FeatureCard({
@@ -25,10 +24,8 @@ export function FeatureCard({
   description,
   features,
   link,
-  isVisible,
 }: FeatureCardProps) {
   const router = useRouter();
-  if (!isVisible) return null;
   return (
     <Card
       className="w-full hover:shadow-lg transition-shadow duration-200 transform hover:scale-105 cursor-pointer"

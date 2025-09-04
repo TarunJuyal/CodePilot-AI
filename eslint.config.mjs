@@ -20,6 +20,8 @@ const eslintConfig = [
       "next-env.d.ts",
       "lib/generated/prisma/**",
       "badcode.txt",
+      "project-requirement.txt",
+      "code-convert.txt",
     ],
   },
 ];

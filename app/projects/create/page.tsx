@@ -18,8 +18,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useTypingEffect } from "@/app/hooks/useTypingEffect";
+import { ProjectInput } from "@/app/utils/constants";
+import { Project } from "@/lib/generated/prisma";
+import { useRouter } from "next/navigation";
 
 export default function CreateEpicPage() {
+  const router = useRouter();
   const loadingMessage = useLoadingDots(
     "Analyzing requirements and breaking down features into epics and tasks"
   );
@@ -63,7 +67,7 @@ export default function CreateEpicPage() {
   const handleSaveConfirmed = async () => {
     setSaveConfirmed(true);
     setConfirmOpen(false);
-    const toastId = toast.loading("Saving project and epics...");
+    const toastId = toast.loading("Creating project and saving epics");
 
     try {
       const res = await fetch("/api/saveEpics", {
@@ -75,10 +79,16 @@ export default function CreateEpicPage() {
       const data = await res.json();
 
       if (data?.output) {
-        console.log(data.output);
+        console.log("Project and Epics created:", data.output.project);
+        const savedProject: Project = await createProject(
+          data?.output?.project as ProjectInput
+        );
+        console.log("Saved project:", savedProject);
         toast.success("Project and Epics saved successfully!", {
           id: toastId,
         });
+        router.push(`/projects/${savedProject.id}`);
+        return;
       } else {
         toast.error(data?.error || "Failed to save epics.", {
           id: toastId,
@@ -91,6 +101,32 @@ export default function CreateEpicPage() {
       });
     } finally {
       setSaveConfirmed(false);
+    }
+  };
+
+  const createProject = async (project: ProjectInput) => {
+    const toastId = toast.loading("Saving project to database");
+    try {
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ project }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to create project");
+      }
+
+      toast.success("Project saved to database", { id: toastId });
+
+      return await res.json();
+    } catch (err) {
+      console.error("createProject error:", err);
+      toast.error("Failed to save project to database", { id: toastId });
+      throw err;
     }
   };
 

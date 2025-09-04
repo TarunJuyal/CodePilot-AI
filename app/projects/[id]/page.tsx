@@ -7,39 +7,114 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Eye, Pencil, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-
-// Mock data
-const mockProject = {
-  id: 1,
-  name: "Reporting Project",
-  epics: [
-    {
-      id: 101,
-      title: "Cash Close Report",
-      stories: [
-        { id: 1001, title: "Build API for Subreport 1", storyPoints: 3 },
-        { id: 1002, title: "UI for Subreport 1", storyPoints: 5 },
-      ],
-    },
-    {
-      id: 102,
-      title: "Realtime Report",
-      stories: [
-        { id: 2001, title: "Backend service for streaming", storyPoints: 8 },
-        { id: 2002, title: "Frontend React integration", storyPoints: 5 },
-      ],
-    },
-  ],
-};
+import { useRouter, useParams, redirect } from "next/navigation";
+import { ProjectInput } from "@/app/utils/constants";
+import PageLoader from "@/app/components/page-loader";
 
 export default function ProjectDetailsPage() {
+  const params = useParams();
+  const projectId = params?.id;
   const router = useRouter();
   const [exporting, setExporting] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [projectDetails, setProjectDetails] = useState<ProjectInput | null>(
+    null
+  );
+  const [deleting, setDeleting] = useState(false);
+
+  if (!projectId) {
+    redirect("/projects");
+  }
+
+  useEffect(() => {
+    const fetchProjectDetails = async () => {
+      setLoading(true);
+      const toastId = toast.loading("Loading project details...");
+      try {
+        const res = await fetch(`/api/projects/${projectId}`);
+        if (res.status === 404) {
+          toast.error("Project not found", { id: toastId });
+          router.push("/not-found");
+        }
+        if (!res.ok) {
+          throw new Error("Failed to fetch project details");
+        }
+        const data = await res.json();
+        setProjectDetails(data);
+        console.log("Fetched project details:", data);
+        toast.success("Project details loaded", { id: toastId });
+      } catch (error: unknown) {
+        console.error("Failed to fetch project details", error);
+        toast.error("Failed to load project details", { id: toastId });
+        redirect("/projects");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProjectDetails();
+  }, [projectId]);
+
+  const handleStoryDelete = (storyId: string) => async () => {
+    if (deleting) return;
+    setDeleting(true);
+    const toastId = toast.loading("Deleting story");
+    try {
+      const res = await fetch(`/api/story/${storyId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        throw new Error("Failed to delete story");
+      }
+      const updatedEpics = projectDetails?.epics?.map((epic) => ({
+        ...epic,
+        stories: epic.stories?.filter((story) => story.id !== storyId),
+      }));
+
+      if (projectDetails) {
+        setProjectDetails({
+          ...projectDetails,
+          epics: updatedEpics,
+          id: projectDetails.id,
+        });
+      }
+      toast.success("Story deleted", { id: toastId });
+    } catch (error: unknown) {
+      console.error("Error deleting story:", error);
+      toast.error("Failed to delete story.", { id: toastId });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleEpicDelete = (epicId: string) => async () => {
+    setDeleting(true);
+    const toastId = toast.loading("Deleting epic");
+    try {
+      const res = await fetch(`/api/epics/${epicId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        throw new Error("Failed to delete epic");
+      }
+      const updatedEpics = projectDetails?.epics?.filter(
+        (epic) => epic.id !== epicId
+      );
+      setProjectDetails({
+        ...projectDetails!,
+        epics: updatedEpics,
+        id: projectDetails!.id,
+      });
+      toast.success("Epic deleted", { id: toastId });
+    } catch (error: unknown) {
+      console.error("Error deleting epic:", error);
+      toast.error("Failed to delete epic.", { id: toastId });
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const onExport = () => {
     console.log("Export to PDF clicked");
@@ -53,84 +128,53 @@ export default function ProjectDetailsPage() {
   };
 
   return (
-    <div className="container mx-auto py-8">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">{mockProject.name}</h1>
-        <Button variant="outline" onClick={onExport} disabled={exporting}>
-          {exporting ? "Exporting" : "Export to PDF"}
-        </Button>
-      </div>
+    <>
+      {loading ? (
+        <PageLoader />
+      ) : (
+        <div className="container mx-auto py-8">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold">{projectDetails?.name}</h1>
+            {/* <Button
+              variant="outline"
+              onClick={onExport}
+              disabled={exporting || deleting}
+            >
+              {exporting ? "Exporting" : "Export to PDF"}
+            </Button> */}
+          </div>
 
-      {/* Epics Accordion */}
-      <Accordion type="single" collapsible className="w-full">
-        {mockProject.epics.map((epic, epicIndex) => (
-          <AccordionItem key={epic.id} value={`epic-${epic.id}`}>
-            <AccordionTrigger>
-              <div className="flex items-center gap-4 w-full">
-                <div className="flex items-center gap-3 flex-1">
-                  <span className="font-mono w-6">{epicIndex + 1}.</span>
-                  <span>{epic.title}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    className="p-2 rounded hover:bg-accent focus:outline-none"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      router.push(`/epics/${epic.id}/view`);
-                    }}
-                  >
-                    <Eye className="h-4 w-4 text-blue-500" />
-                  </span>
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    className="p-2 rounded hover:bg-accent focus:outline-none"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      router.push(`/epics/${epic.id}/edit`);
-                    }}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </span>
-                  {/* <span
-                    role="button"
-                    tabIndex={0}
-                    className="p-2 rounded hover:bg-accent focus:outline-none"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // handle delete
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </span> */}
-                </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-2 pl-10">
-                {epic.stories.map((story, storyIndex) => (
-                  <div
-                    key={story.id}
-                    className="flex justify-between items-center py-2"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono w-6">
-                        {epicIndex + 1}.{storyIndex + 1}
-                      </span>
-                      <span>{story.title}</span>
+          {/* Epics Accordion */}
+          <Accordion type="single" collapsible className="w-full">
+            {projectDetails?.epics?.map((epic, epicIndex) => (
+              <AccordionItem key={epic.id} value={`epic-${epic.id}`}>
+                <AccordionTrigger>
+                  <div className="flex items-center gap-4 w-full">
+                    <div className="flex items-center gap-3 flex-1">
+                      <span className="font-mono w-6">{epicIndex + 1}.</span>
+                      <span>{epic.title}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">
-                        {story.storyPoints} points
-                      </span>
                       <span
                         role="button"
                         tabIndex={0}
                         className="p-2 rounded hover:bg-accent focus:outline-none"
-                        onClick={() => router.push(`/stories/${story.id}/view`)}
+                        onClick={(e) => {
+                          if (deleting) return;
+                          e.stopPropagation();
+                          localStorage.setItem(
+                            "epicParentPage",
+                            window.location.pathname
+                          );
+                          router.push(`/epics/${epic.id}/view`);
+                        }}
+                        aria-disabled={deleting}
+                        style={
+                          deleting
+                            ? { pointerEvents: "none", opacity: 0.5 }
+                            : {}
+                        }
                       >
                         <Eye className="h-4 w-4 text-blue-500" />
                       </span>
@@ -138,28 +182,124 @@ export default function ProjectDetailsPage() {
                         role="button"
                         tabIndex={0}
                         className="p-2 rounded hover:bg-accent focus:outline-none"
-                        onClick={() => router.push(`/stories/${story.id}/edit`)}
+                        onClick={(e) => {
+                          if (deleting) return;
+                          e.stopPropagation();
+                          localStorage.setItem(
+                            "epicParentPage",
+                            window.location.pathname
+                          );
+                          router.push(`/epics/${epic.id}/edit`);
+                        }}
+                        aria-disabled={deleting}
+                        style={
+                          deleting
+                            ? { pointerEvents: "none", opacity: 0.5 }
+                            : {}
+                        }
                       >
                         <Pencil className="h-4 w-4" />
                       </span>
-                      {/* <span
+                      <span
                         role="button"
                         tabIndex={0}
                         className="p-2 rounded hover:bg-accent focus:outline-none"
-                        onClick={() => {
-                          // handle delete
-                        }}
+                        onClick={handleEpicDelete(epic.id)}
+                        aria-disabled={deleting}
+                        style={
+                          deleting
+                            ? { pointerEvents: "none", opacity: 0.5 }
+                            : {}
+                        }
                       >
                         <Trash2 className="h-4 w-4 text-red-500" />
-                      </span> */}
+                      </span>
                     </div>
                   </div>
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
-    </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-2 pl-10">
+                    {epic?.stories?.map((story, storyIndex) => (
+                      <div
+                        key={story.id}
+                        className="flex justify-between items-center py-2"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="font-mono w-6">
+                            {epicIndex + 1}.{storyIndex + 1}
+                          </span>
+                          <span>{story.title}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">
+                            {story.storyPoints} points
+                          </span>
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            className="p-2 rounded hover:bg-accent focus:outline-none"
+                            onClick={() => {
+                              if (deleting) return;
+                              localStorage.setItem(
+                                "epicParentPage",
+                                window.location.pathname
+                              );
+                              router.push(`/stories/${story.id}/view`);
+                            }}
+                            aria-disabled={deleting}
+                            style={
+                              deleting
+                                ? { pointerEvents: "none", opacity: 0.5 }
+                                : {}
+                            }
+                          >
+                            <Eye className="h-4 w-4 text-blue-500" />
+                          </span>
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            className="p-2 rounded hover:bg-accent focus:outline-none"
+                            onClick={() => {
+                              if (deleting) return;
+                              localStorage.setItem(
+                                "epicParentPage",
+                                window.location.pathname
+                              );
+                              router.push(`/stories/${story.id}/edit`);
+                            }}
+                            aria-disabled={deleting}
+                            style={
+                              deleting
+                                ? { pointerEvents: "none", opacity: 0.5 }
+                                : {}
+                            }
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </span>
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            className="p-2 rounded hover:bg-accent focus:outline-none"
+                            onClick={handleStoryDelete(story.id)}
+                            aria-disabled={deleting}
+                            style={
+                              deleting
+                                ? { pointerEvents: "none", opacity: 0.5 }
+                                : {}
+                            }
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      )}
+    </>
   );
 }

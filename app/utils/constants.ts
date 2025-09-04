@@ -52,6 +52,33 @@ export const CODE_GENERATION_MODEL =
 export const EPIC_JSON_SUMMARIZATION_MODEL =
   "meta-llama/Llama-4-Scout-17B-16E-Instruct:groq";
 
+export const PAGE_SIZE = 7;
+
 export interface RouteParams {
   params: Promise<{ id: string }>;
+}
+
+export interface StoryInput {
+  id: string;
+  title: string;
+  description?: string;
+  acceptanceCriteria?: string;
+  storyPoints: number;
+  epicId?: string;
+  epics?: EpicInput;
+}
+
+export interface EpicInput {
+  id: string;
+  title: string;
+  description?: string;
+  acceptanceCriteria?: string;
+  stories?: StoryInput[];
+  projectId?: string;
+}
+
+export interface ProjectInput {
+  id: string;
+  name: string;
+  epics?: EpicInput[];
 }

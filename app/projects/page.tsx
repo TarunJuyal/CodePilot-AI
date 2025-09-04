@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,31 +13,52 @@ import {
 import { Trash2, Eye } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Project } from "@/lib/generated/prisma";
+import { toast } from "sonner";
+import PageLoader from "../components/page-loader";
+import { PAGE_SIZE } from "../utils/constants";
 
-type Project = {
-  _id: string;
-  name: string;
-  createdAt: string;
-};
-
-const mockProjects: Project[] = Array.from({ length: 10 }, (_, i) => ({
-  _id: String(i + 1),
-  name: `Project ${i + 1}`,
-  createdAt: `2025-08-${(i % 28) + 1}`,
-}));
+interface ProjectResponse {
+  projects: Project[];
+  total: number;
+  currentPage: number;
+  totalPages: number;
+}
 
 export default function EpicGeneratorPage() {
   const router = useRouter();
-  const [projects, setProjects] = useState<Project[]>(mockProjects);
+  const [projects, setProjects] = useState<Project[]>();
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const pageSize = 7;
-  const totalPages = Math.ceil(projects.length / pageSize);
+  useEffect(() => {
+    const fetchProjects = async () => {
+      setLoading(true);
+      const toastId = toast.loading("Loading projects...");
+      try {
+        const res = await fetch(`/api/projects?currentPage=${currentPage}`);
+        if (!res.ok) throw new Error("Failed to fetch projects");
 
-  const paginatedProjects = projects.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+        const data: ProjectResponse = await res.json();
+        setProjects(data?.projects);
+        setTotalPages(data?.totalPages);
+        toast.success("Projects loaded successfully", {
+          id: toastId,
+        });
+      } catch (err) {
+        console.error("Error fetching projects:", err);
+        toast.error("Error loading projects", {
+          id: toastId,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, [currentPage]);
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((p) => p + 1);
@@ -45,6 +66,25 @@ export default function EpicGeneratorPage() {
 
   const handlePrev = () => {
     if (currentPage > 1) setCurrentPage((p) => p - 1);
+  };
+
+  const handleDelete = async (projectId: string) => {
+    if (deleting) return;
+    setDeleting(true);
+    const toastId = toast.loading("Deleting project...");
+    try {
+      const res = await fetch(`/api/projects/${projectId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete project");
+      setProjects((prev) => prev?.filter((p) => p.id !== projectId));
+      toast.success("Project deleted successfully", { id: toastId });
+    } catch (err) {
+      console.error("Error deleting project:", err);
+      toast.error("Error deleting project", { id: toastId });
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -57,8 +97,9 @@ export default function EpicGeneratorPage() {
         </Button>
       </div>
 
-      {/* Conditional Rendering */}
-      {projects.length === 0 ? (
+      {loading ? (
+        <PageLoader />
+      ) : projects?.length === 0 ? (
         <p className="text-2xl text-muted-foreground text-center mt-30">
           No current projects. Click on the{" "}
           <span className="font-semibold">Add Project</span> button to Start
@@ -80,24 +121,32 @@ export default function EpicGeneratorPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedProjects.map((project, index) => (
-                <TableRow key={project._id}>
+              {projects?.map((project, index) => (
+                <TableRow key={project.id}>
                   <TableCell>
-                    {(currentPage - 1) * pageSize + index + 1}
+                    {(currentPage - 1) * PAGE_SIZE + index + 1}
                   </TableCell>
                   <TableCell>{project.name}</TableCell>
-                  <TableCell>{project.createdAt}</TableCell>
+                  <TableCell>
+                    {new Date(project.createdAt).toLocaleString()}
+                  </TableCell>
                   <TableCell className="text-right space-x-2">
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => router.push(`/projects/${project._id}`)}
+                      onClick={() => router.push(`/projects/${project.id}`)}
+                      disabled={deleting}
                     >
                       <Eye className="h-4 w-4 text-blue-500" />
                     </Button>
-                    {/* <Button variant="ghost" size="icon">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(project.id)}
+                      disabled={deleting}
+                    >
                       <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button> */}
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

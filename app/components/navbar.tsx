@@ -16,9 +16,10 @@ import { BrainCircuit, Menu, X } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 
 const featureTabs = [
-  { label: "Code Review", href: "/code-review", isVisible: true },
-  { label: "Code Conversion", href: "/code-conversion", isVisible: true },
-  { label: "Epic Generator", href: "/projects", isVisible: false },
+  { label: "Code Review", href: "/code-review" },
+  { label: "Code Conversion", href: "/code-conversion" },
+  { label: "Epic Generator", href: "/projects/create" },
+  { label: "Your Current Projects", href: "/projects" },
 ];
 
 export default function Navbar() {
@@ -40,17 +41,15 @@ export default function Navbar() {
             <span>AI Dashboard</span>
           </Link>
           <div className="hidden md:flex items-center space-x-2">
-            {featureTabs
-              .filter((tab) => tab.isVisible)
-              .map((tab) => (
-                <Link
-                  key={tab.label}
-                  href={tab.href}
-                  className="text-sm font-medium px-3 py-1 rounded hover:bg-muted transition-colors"
-                >
-                  {tab.label}
-                </Link>
-              ))}
+            {featureTabs.map((tab) => (
+              <Link
+                key={tab.label}
+                href={tab.href}
+                className="text-sm font-medium px-3 py-1 rounded hover:bg-muted transition-colors"
+              >
+                {tab.label}
+              </Link>
+            ))}
           </div>
         </div>
 
@@ -111,18 +110,16 @@ export default function Navbar() {
               </button>
             </div>
             <nav className="flex flex-col space-y-4">
-              {featureTabs
-                .filter((tab) => tab.isVisible)
-                .map((tab) => (
-                  <Link
-                    key={tab.label}
-                    href={tab.href}
-                    className="text-base font-medium px-3 py-2 rounded hover:bg-muted transition-colors"
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    {tab.label}
-                  </Link>
-                ))}
+              {featureTabs.map((tab) => (
+                <Link
+                  key={tab.label}
+                  href={tab.href}
+                  className="text-base font-medium px-3 py-2 rounded hover:bg-muted transition-colors"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  {tab.label}
+                </Link>
+              ))}
               <button
                 className="text-base font-medium px-3 py-2 rounded hover:bg-muted transition-colors text-left"
                 onClick={() => {

@@ -16,7 +16,6 @@ export default function Home() {
         "Explain code logic and provide documentation.",
         "Support for multiple programming languages.",
       ],
-      isVisible: true,
     },
     {
       icon: <GitPullRequest className="w-6 h-6" />,
@@ -28,12 +27,11 @@ export default function Home() {
         "Preserve logic and structure during conversion.",
         "Support for code snippets and full files.",
       ],
-      isVisible: true,
     },
     {
       icon: <ClipboardList className="w-6 h-6" />,
       title: "Epic Generator",
-      link: "/projects",
+      link: "/projects/create",
       description:
         "Generate epics and subtasks from a project description automatically.",
       features: [
@@ -42,7 +40,6 @@ export default function Home() {
         "Customize output for different project management tools.",
         "Accelerate project planning and task breakdown.",
       ],
-      isVisible: false,
     },
   ];
 
