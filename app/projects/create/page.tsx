@@ -79,11 +79,9 @@ export default function CreateEpicPage() {
       const data = await res.json();
 
       if (data?.output) {
-        console.log("Project and Epics created:", data.output.project);
         const savedProject: Project = await createProject(
           data?.output?.project as ProjectInput
         );
-        console.log("Saved project:", savedProject);
         toast.success("Project and Epics saved successfully!", {
           id: toastId,
         });

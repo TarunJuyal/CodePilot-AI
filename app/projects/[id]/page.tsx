@@ -44,7 +44,6 @@ export default function ProjectDetailsPage() {
         }
         const data = await res.json();
         setProjectDetails(data);
-        console.log("Fetched project details:", data);
         toast.success("Project details loaded", { id: toastId });
       } catch (error: unknown) {
         console.error("Failed to fetch project details", error);
@@ -116,15 +115,34 @@ export default function ProjectDetailsPage() {
     }
   };
 
-  const onExport = () => {
-    console.log("Export to PDF clicked");
+  const onExport = async () => {
     setExporting(true);
     const toastId = toast.loading("Exporting to PDF...");
 
-    setTimeout(() => {
+    try {
+      const res = await fetch(`/api/projects/${projectId}/export`);
+      if (res.status === 404) {
+        toast.error("Project not found", { id: toastId });
+        return;
+      }
+      if (!res.ok) throw new Error("Failed to export PDF");
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${projectDetails?.name}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success("Exported to PDF successfully", { id: toastId });
+    } catch (err) {
+      console.error("Export failed", err);
+      toast.error("Failed to export to PDF", { id: toastId });
+    } finally {
       setExporting(false);
-      toast.success("Exported to PDF successfully!", { id: toastId });
-    }, 2000);
+    }
   };
 
   return (
@@ -136,13 +154,13 @@ export default function ProjectDetailsPage() {
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold">{projectDetails?.name}</h1>
-            {/* <Button
+            <Button
               variant="outline"
               onClick={onExport}
               disabled={exporting || deleting}
             >
               {exporting ? "Exporting" : "Export to PDF"}
-            </Button> */}
+            </Button>
           </div>
 
           {/* Epics Accordion */}

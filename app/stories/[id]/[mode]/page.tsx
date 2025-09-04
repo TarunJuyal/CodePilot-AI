@@ -40,7 +40,7 @@ export default function StoryDetailsPage() {
         setStoryDetails(data);
         toast.success("Story details loaded", { id: toastId });
       } catch (error: unknown) {
-        console.log("Error fetching story details:", error);
+        console.error("Error fetching story details:", error);
         toast.error("Failed to load story details.", { id: toastId });
       } finally {
         setLoading(false);
@@ -73,7 +73,7 @@ export default function StoryDetailsPage() {
           setEditMode(false);
           toast.success("Story changes saved", { id: toastId });
         } catch (error: unknown) {
-          console.log("Error saving story changes:", error);
+          console.error("Error saving story changes:", error);
           toast.error("Failed to save story changes.", { id: toastId });
         } finally {
           setSaving(false);
@@ -99,7 +99,7 @@ export default function StoryDetailsPage() {
       toast.success("Story deleted", { id: toastId });
       router.push(localStorage.getItem("epicParentPage") || "/");
     } catch (error: unknown) {
-      console.log("Error deleting story:", error);
+      console.error("Error deleting story:", error);
       toast.error("Failed to delete story.", { id: toastId });
     } finally {
       setDeleting(false);

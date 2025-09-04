@@ -124,8 +124,7 @@ export default function Navbar() {
                 className="text-base font-medium px-3 py-2 rounded hover:bg-muted transition-colors text-left"
                 onClick={() => {
                   setSidebarOpen(false);
-                  // NextAuth signOut will go here
-                  console.log("Sign out clicked");
+                  signOut({ callbackUrl: "/" });
                 }}
               >
                 Sign out
