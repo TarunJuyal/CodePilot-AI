@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
         Rules:
         - Do NOT include explanations or extra text. Only output JSON.
         - JSON structure:
+        - Be sure to follow this exact structure and nesting with exact types to avoid failure when saving to db:
         {
         "project": {
             "name": "Project Name",
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
         - Only use the provided backlog text.
         - Do not invent extra features.
         - Use Fibonacci story points (1, 2, 3, 5, 8, 13). 
-        - Break stories down if they exceed 13 points.
+        - Try and Break stories down if they are 8 or 13 points.
 
         Project Name: ${projectName}
 
