@@ -70,16 +70,16 @@ export default function CodeConversionPage() {
   return (
     <div className="h-dvh flex flex-col">
       {/* Header Section */}
-      <div className="p-4 flex justify-between items-center border-b">
+      <div className="p-4 flex flex-col md:flex-row justify-between items-start md:items-center border-b gap-4 md:gap-0">
         <h1 className="text-2xl font-bold">Convert Your Code</h1>
-        <div className="flex gap-3">
+        <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
           <AddPromptButton pageKey="code-conversion" />
           <Button
             variant="default"
             onClick={handleSubmit}
             disabled={loading || !codeInput.trim() || !inputLang || !outputLang}
           >
-            Submit Conversion
+            Submit For Conversion
           </Button>
         </div>
       </div>

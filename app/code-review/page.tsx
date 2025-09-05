@@ -53,16 +53,16 @@ export default function CodeReviewPage() {
   return (
     <div className="h-dvh flex flex-col">
       {/* Header Section */}
-      <div className="p-4 flex justify-between items-center border-b">
+      <div className="p-4 flex flex-col gap-3 border-b md:flex-row md:justify-between md:items-center">
         <h1 className="text-2xl font-bold">Review Your Code</h1>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 md:flex-row">
           <AddPromptButton pageKey="code-review" />
           <Button
             variant="default"
             onClick={handleSubmit}
             disabled={loading || !codeInput.trim()}
           >
-            Submit Code Review
+            Submit For Code Review
           </Button>
         </div>
       </div>

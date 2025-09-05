@@ -131,9 +131,9 @@ export default function CreateEpicPage() {
   return (
     <div className="h-dvh flex flex-col">
       {/* Header Section */}
-      <div className="p-4 flex justify-between items-center border-b">
+      <div className="p-4 flex flex-col gap-4 border-b md:flex-row md:justify-between md:items-center">
         <h1 className="text-2xl font-bold">Generate Epics for Your Project</h1>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 md:flex-row">
           <Button
             variant="secondary"
             onClick={handleSubmit}

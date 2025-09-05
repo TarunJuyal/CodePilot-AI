@@ -236,7 +236,7 @@ export default function ProjectDetailsPage() {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                  <div className="space-y-2 pl-10">
+                  <div className="space-y-2 pl-5">
                     {epic?.stories?.map((story, storyIndex) => (
                       <div
                         key={story.id}

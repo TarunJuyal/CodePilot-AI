@@ -10,6 +10,7 @@ import { authOptions } from "../lib/auth";
 import { redirect } from "next/navigation";
 import NextAuthProvider from "./components/session-provider";
 import { Analytics } from "@vercel/analytics/next";
+import Footer from "./components/footer";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -40,12 +41,13 @@ export default async function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <NextAuthProvider>
             <Navbar />
-            <div className="m-4 p-4 h-dvh">
+            <div className="m-4 p-4 h-full">
               <PromptProvider>
                 {children}
                 <Toaster richColors position="bottom-right" closeButton />
               </PromptProvider>
             </div>
+            <Footer />
           </NextAuthProvider>
         </ThemeProvider>
         <Analytics />
