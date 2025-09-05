@@ -9,6 +9,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../lib/auth";
 import { redirect } from "next/navigation";
 import NextAuthProvider from "./components/session-provider";
+import { Analytics } from "@vercel/analytics/next";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -47,6 +48,7 @@ export default async function RootLayout({
             </div>
           </NextAuthProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
