@@ -56,7 +56,7 @@ CodePilot helps you **review code, convert between languages, and generate epics
 ├── app/                # Next.js app directory (routes, pages, layouts)
 │   ├── api/            # API route handlers (auth, code review, conversion, epics)
 │   ├── components/     # Reusable React components (UI, forms, modals)
-│   ├── Context/         # Context for custom promt
+│   ├── Context/        # Context for custom prompt
 │   |── utils/          # Utility functions and helpers
 │   └── hooks/          # Utility functions for effects
 ├── prisma/             # Prisma schema and migrations
